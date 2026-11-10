@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Universal Pension Calculator - Bangladesh</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header class="top">
+  <div>
+    <h1 id="title" data-i18n="appTitle">Universal Pension Calculator</h1>
+    <p id="subtitle" data-i18n="appSubtitle">Bangladesh's Universal Pension Scheme - Progoti, Surokkha, Somota and Probash. Work out your estimated pension.</p>
+  </div>
+  <button id="langBtn" type="button" aria-label="Switch language">Bangla</button>
+</header>
+
+<main>
+  <section class="card" aria-labelledby="schemeH">
+    <h2 id="schemeH" data-i18n="schemeTitle">1. Choose a scheme</h2>
+    <div id="schemeCards" class="scheme-grid" role="radiogroup" aria-label="Scheme"></div>
+  </section>
+
+  <section class="card" aria-labelledby="calcH">
+    <h2 id="calcH" data-i18n="calcTitle">2. Your calculation</h2>
+    <div class="field">
+      <label for="ageInput" data-i18n="ageLabel">Your current age</label>
+      <input id="ageInput" type="number" inputmode="numeric" min="10" max="100" placeholder="30">
+      <p class="hint" data-i18n="ageHint">Enter an age between 10 and 100.</p>
+    </div>
+    <div class="field">
+      <label data-i18n="monthlyLabel">Monthly contribution</label>
+      <div id="amountChips" class="chips"></div>
+      <input id="amountInput" type="number" inputmode="numeric" min="500" max="10000" step="500" placeholder="2000">
+      <p class="hint" data-i18n="monthlyHint">Pick a published amount below, or type your own (a multiple of 500 BDT).</p>
+    </div>
+    <p id="calcError" class="error" hidden></p>
+  </section>
+
+  <section class="card result-card" aria-labelledby="resH">
+    <h2 id="resH" data-i18n="resultsTitle">Result</h2>
+    <p id="emptyCalc" data-i18n="emptyCalc">Enter your age and monthly contribution to see your estimated pension here.</p>
+    <div id="results" hidden>
+      <p><span class="row-label" data-i18n="eligibilityLabel">Eligibility</span> <span id="eligBadge" class="badge"></span></p>
+      <dl class="rows">
+        <div class="row"><dt data-i18n="yearsLabel">You will contribute for</dt><dd id="resYears"></dd></div>
+        <div class="row"><dt data-i18n="startAgeLabel">Pension starts at age</dt><dd id="resStartAge"></dd></div>
+        <div class="row"><dt data-i18n="startYearLabel">Pension starts in</dt><dd id="resStartYear"></dd></div>
+        <div class="row"><dt data-i18n="ownMonthlyLabel">Your monthly contribution</dt><dd id="resOwnMonthly"></dd></div>
+        <div class="row" id="govtMonthlyRow" hidden><dt data-i18n="govtMonthlyLabel">Government monthly top-up</dt><dd id="resGovtMonthly"></dd></div>
+        <div class="row"><dt data-i18n="ownTotalLabel">Your total contribution</dt><dd id="resOwnTotal"></dd></div>
+        <div class="row" id="govtTotalRow" hidden><dt data-i18n="govtTotalLabel">Government total top-up</dt><dd id="resGovtTotal"></dd></div>
+        <div class="row"><dt data-i18n="totalContributedLabel">Total contributed (you + government)</dt><dd id="resTotal"></dd></div>
+      </dl>
+      <div class="pension-big">
+        <span data-i18n="monthlyPensionLabel">Estimated monthly pension</span>
+        <strong id="resPension"></strong>
+        <small data-i18n="estimateNote">This is an estimate - not an official figure.</small>
+      </div>
+      <p class="to75"><span data-i18n="pensionTo75Label">Total pension from age 60 to 75 (estimate)</span>: <strong id="resTo75"></strong><br>
+      <small data-i18n="pensionTo75Note">Published figures count pension to age 75; the pension itself continues for life.</small></p>
+    </div>
+  </section>
+
+  <section class="card" aria-labelledby="tableH">
+    <h2 id="tableH" data-i18n="tableTitle">Published official examples</h2>
+    <p data-i18n="tableNote">From the National Pension Authority's published figures: monthly pension after contributing for 42 years (joining at 18), or for the minimum 10 years. Values for other periods are interpolated between these two published figures and are estimates.</p>
+    <div class="table-wrap">
+      <table id="officialTable">
+        <thead><tr>
+          <th data-i18n="thScheme">Scheme</th>
+          <th data-i18n="thOption">Monthly contribution</th>
+          <th data-i18n="thPension42">Monthly pension after 42 years</th>
+          <th data-i18n="thPension10">Monthly pension after 10 years</th>
+        </tr></thead>
+        <tbody id="officialBody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="card" aria-labelledby="saveH">
+    <h2 id="saveH" data-i18n="saveTitle">Saved calculations</h2>
+    <div class="save-row">
+      <input id="scenarioName" type="text" maxlength="60" data-i18n-ph="namePlaceholder" placeholder="Name this calculation (e.g. My Progoti)">
+      <button id="saveBtn" type="button" data-i18n="saveBtn">Save calculation</button>
+    </div>
+    <p id="savedMsg" class="ok" hidden></p>
+    <p id="noScenarios" data-i18n="noScenarios">No calculations saved yet.</p>
+    <ul id="scenarioList" class="scenarios"></ul>
+    <div class="data-row">
+      <button id="exportBtn" type="button" data-i18n="exportBtn">Export (JSON)</button>
+      <textarea id="exportText" rows="3" readonly aria-label="Exported JSON"></textarea>
+    </div>
+    <div class="data-row">
+      <textarea id="importText" rows="3" data-i18n-ph="importPlaceholder" placeholder="Paste JSON here..."></textarea>
+      <button id="importBtn" type="button" data-i18n="importBtn">Import</button>
+    </div>
+    <p id="importOk" class="ok" hidden data-i18n="importOk">Import succeeded.</p>
+    <p id="importFail" class="error" hidden data-i18n="importFail">Import failed - this file is not from this app or is damaged.</p>
+    <h3 data-i18n="eraseTitle">Erase everything</h3>
+    <p class="hint" data-i18n="eraseHint">Type DELETE to erase all saved calculations.</p>
+    <div class="save-row">
+      <input id="eraseInput" type="text" autocomplete="off" placeholder="DELETE">
+      <button id="eraseBtn" type="button" data-i18n="eraseBtn">Erase</button>
+    </div>
+    <p id="eraseWrong" class="error" hidden data-i18n="eraseWrong">Wrong word - type DELETE to erase.</p>
+    <p id="erasedMsg" class="ok" hidden data-i18n="erasedMsg">All saved calculations have been erased.</p>
+  </section>
+
+  <footer class="card disclaimer">
+    <h3 id="disclaimer" data-i18n="disclaimerTitle">Important</h3>
+    <p data-i18n="disclaimerText">This app is for educational estimates only and is not a government service. Pension figures are estimated from two published examples of the National Pension Authority (10 and 42 contribution years); the actual pension depends on investment returns and the rules in force. Verify at upension.gov.bd.</p>
+    <p data-i18n="footerText">Offline app - your data stays in your own browser only.</p>
+  </footer>
+</main>
+
+<script src="data.js"></script>
+<script src="i18n.js"></script>
+<script src="logic.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
